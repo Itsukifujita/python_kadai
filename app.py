@@ -1,12 +1,28 @@
 # splite3をimportする
-import sqlite3
+import sqlite3, os
 # flaskをimportしてflaskを使えるようにする
-from flask import Flask , render_template , request , redirect , session
+from flask import Flask , render_template , request , redirect , session, url_for
+from werkzeug.utils import secure_filename
+from flask import send_from_directory
 # appにFlaskを定義して使えるようにしています。Flask クラスのインスタンスを作って、 app という変数に代入しています。
+
+# 画像のアップロード先のディレクトリ
+UPLOAD_FOLDER = './static/img'
+# アップロードされる拡張子の制限
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'gif'])
+
 app = Flask(__name__)
 
 # Flask では標準で Flask.secret_key を設定すると、sessionを使うことができます。この時、Flask では session の内容を署名付きで Cookie に保存します。
 app.secret_key = 'sunabakoza'
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allwed_file(filename):
+    # .があるかどうかのチェックと、拡張子の確認
+    # OKなら１、だめなら0
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @app.route('/')
 def index():
@@ -83,10 +99,10 @@ def bbs():
         c = conn.cursor()
         # # DBにアクセスしてログインしているユーザ名と投稿内容を取得する
         # クッキーから取得したuser_idを使用してuserテーブルのnameを取得
-        c.execute("select name from user where id = ?", (user_id,))
+        c.execute("select name, img from user where id = ?", (user_id,))
         # fetchoneはタプル型
         user_info = c.fetchone()
-        c.execute("select id,comment from bbs where userid = ? order by id", (user_id,))
+        c.execute("select id,comment,time from bbs where userid = ? and delflag = 0 order by id", (user_id,))
         comment_list = []
         for row in c.fetchall():
             comment_list.append({"id": row[0], "comment": row[1]})
@@ -164,11 +180,33 @@ def del_task():
     id = int(id)
     conn = sqlite3.connect("service.db")
     c = conn.cursor()
-    c.execute("delete from bbs where id = ?", (id,))
+    c.execute("update bbs set delflag = 1 where id = ?", (id,))
     conn.commit()
     c.close()
     return redirect("/bbs")
 
+@app.route('/', methods=['GET', 'POST'])
+def uploads_file():
+    # リクエストがポストかどうかの判別
+    if request.method == 'POST':
+        # ファイルがなかった場合の処理
+        if 'file' not in request.files:
+            flash('ファイルがありません')
+            return redirect(request.url)
+        # データの取り出し
+        file = request.files['file']
+        # ファイル名がなかった時の処理
+        if file.filename == '':
+            flash('ファイルがありません')
+            return redirect(request.url)
+        # ファイルのチェック
+        if file and allwed_file(file.filename):
+            # 危険な文字を削除（サニタイズ処理）
+            filename = secure_filename(file.filename)
+            # ファイルの保存
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            # アップロード後のページに転送
+            return redirect(url_for('uploaded_file', filename=filename))
 
 @app.errorhandler(403)
 def mistake403(code):
