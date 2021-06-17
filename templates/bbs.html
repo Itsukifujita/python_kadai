@@ -20,8 +20,10 @@
   {% for item in comment_list %}
   <div class="bbs_content">
     <p>{{item["comment"]}}</p>
+      <!-- 三木編集開始  -->
       <a href="/edit/{{item['id']}}">編集</a>
-      <form action="/del" method="post">
+      <form action="/impression_del">
+      <!-- 三木編集終了 -->
         <input type="hidden" name="comment_id" value="{{item['id']}}">
         <input type="submit" name="delete" value="削除する">
     </form><br><br>
