@@ -208,13 +208,13 @@ def uploads_file():
             # アップロード後のページに転送
             return redirect(url_for('uploaded_file', filename=filename))
 
-#三木追加開始
+#三木追加開始 
 @app.route('/impression_del')
 def impression_del():
 
     return render_template("impression_del.html")
 
-#三木追加終了
+#三木追加終了 
 
 @app.errorhandler(403)
 def mistake403(code):
