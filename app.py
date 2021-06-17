@@ -1,5 +1,5 @@
-# splite3をimportする
-import sqlite3, os
+# splite3をimportする   datetime追加：桜奈
+import sqlite3, os , datetime
 # flaskをimportしてflaskを使えるようにする
 from flask import Flask , render_template , request , redirect , session, url_for
 from werkzeug.utils import secure_filename
@@ -115,13 +115,17 @@ def bbs():
 
 @app.route('/add', methods=["POST"])
 def add():
+    # 追加ーーーーーーーーーーーーー桜奈
+    dt_now = datetime.datetime.now()
+    #追加ーーーーーーーーーーここまで
+
     user_id = session['user_id']
     # フォームから入力されたアイテム名の取得
     comment = request.form.get("comment")
     conn = sqlite3.connect('service.db')
     c = conn.cursor()
-    # DBにデータを追加する
-    c.execute("insert into bbs values(null,?,?)", (user_id, comment))
+    # DBにデータを追加するtime追加,dt_now.strftime('%Y年%m月%d日 %H時%M分%S秒'):桜奈
+    c.execute("insert into bbs values(null,?,?,0,?)", (user_id, comment, dt_now.strftime('%Y年%m月%d日 %H時%M分%S秒')))
     conn.commit()
     conn.close()
     return redirect('/bbs')
