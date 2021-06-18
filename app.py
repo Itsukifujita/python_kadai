@@ -216,7 +216,7 @@ def uploads_file():
             c.execute("update user set img = ? where id = ?", (filename, id))
             comment = c.fetchone()
             conn.close()
-            return redirect(url_for('uploaded_file', filename=filename))
+            return redirect("/bbs")
 
 #三木追加開始 
 @app.route('/impression_del/<int:id>')
