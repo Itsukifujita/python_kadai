@@ -177,11 +177,11 @@ def update_item():
         return redirect("/login")
 
 
-@app.route('/del' ,methods=["POST"])
-def del_task():
+@app.route('/del/<int:id>')
+def del_task(id):
     # クッキーから user_id を取得
-    id = request.form.get("comment_id")
-    id = int(id)
+    #id = request.form.get("comment_id")
+    #id = int(id)
     conn = sqlite3.connect("service.db")
     c = conn.cursor()
     c.execute("update bbs set delflag = 1 where id = ?", (id,))
@@ -189,7 +189,7 @@ def del_task():
     c.close()
     return redirect("/bbs")
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/imgadd', methods=['POST'])
 def uploads_file():
     # リクエストがポストかどうかの判別
     if request.method == 'POST':
@@ -210,13 +210,24 @@ def uploads_file():
             # ファイルの保存
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             # アップロード後のページに転送
+            id = session['user_id']
+            conn = sqlite3.connect('service.db')
+            c = conn.cursor()
+            c.execute("update user set img = ? where id = ?", (filename, id))
+            comment = c.fetchone()
+            conn.close()
             return redirect(url_for('uploaded_file', filename=filename))
 
 #三木追加開始 
-@app.route('/impression_del')
-def impression_del():
-
-    return render_template("impression_del.html")
+@app.route('/impression_del/<int:id>')
+def impression_del(id):
+    conn = sqlite3.connect('service.db')
+    c = conn.cursor()
+    c.execute("select comment from bbs where id = ?", (id,) )
+    comment = c.fetchone()
+    conn.close()
+    array = {"id":id, "comment":comment[0]}
+    return render_template("impression_del.html", item = array)
 
 #三木追加終了 
 

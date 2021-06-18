@@ -3,9 +3,9 @@
 {% block content %}
 
 <div>
-<form method = post enctype = multipart/form-data>
-  <input type=file name = file>
-  <input type = submit value = Upload>
+<form action="/imgadd" method="post" enctype="multipart/form-data">
+  <input type="file" name="file">
+  <input type="submit" value="Upload">
 </form>
 <img class="user_img" src="../static/img/{{user_info[1]}}">
 <p>{{user_info[0]}}さん こんにちは</p><br>
@@ -20,13 +20,10 @@
   {% for item in comment_list %}
   <div class="bbs_content">
     <p>{{item["comment"]}}</p>
-      <!-- 三木編集開始  -->
-      <a href="/edit/{{item['id']}}">編集</a>
-      <form action="/impression_del">
-      <!-- 三木編集終了 -->
-        <input type="hidden" name="comment_id" value="{{item['id']}}">
-        <input type="submit" name="delete" value="削除する">
-    </form><br><br>
+    <p>投稿時間：{{item["time"]}}</p>
+    <a href="/edit/{{item['id']}}">編集</a>
+    <a href="/impression_del/{{item['id']}}">削除する</a>
+    <br><br>
   </div>
   {% endfor %}
 

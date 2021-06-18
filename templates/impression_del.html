@@ -3,10 +3,13 @@
 {% block content %}
 
 <div>
-  <form action="/del" method="post">
+  <p>あなたが投稿したコメント</p>
+  <p>{{item['comment']}}</p>
+  <p>本当に削除しますか？</p>
+  <form action="/del/{{item['id']}}">
     <input type="submit" name="delete" value="本当に削除する">
   </form>
-    <a href="/bbs.html">aaa</a>
+    <a href="/bbs">削除せず戻る</a>
 </div>
 
 {% endblock %}
