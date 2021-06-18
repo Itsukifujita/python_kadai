@@ -102,10 +102,10 @@ def bbs():
         c.execute("select name, img from user where id = ?", (user_id,))
         # fetchoneはタプル型
         user_info = c.fetchone()
-        c.execute("select id,comment,time from bbs where userid = ? and delflag = 0 order by id", (user_id,))
+        c.execute("select id, comment, time from bbs where userid = ? and delflag = 0 order by id", (user_id,))
         comment_list = []
         for row in c.fetchall():
-            comment_list.append({"id": row[0], "comment": row[1]})
+            comment_list.append({"id": row[0], "comment": row[1], "time": row[2]})
 
         c.close()
         return render_template('bbs.html' , user_info = user_info , comment_list = comment_list)
@@ -210,12 +210,13 @@ def uploads_file():
             # ファイルの保存
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             # アップロード後のページに転送
-            id = session['user_id']
-            conn = sqlite3.connect('service.db')
+            user_id = session['user_id']
+            conn = sqlite3.connect("service.db")
             c = conn.cursor()
-            c.execute("update user set img = ? where id = ?", (filename, id))
-            comment = c.fetchone()
-            conn.close()
+            c.execute("update user set img = ? where id = ?", (filename, user_id))
+            conn.commit()
+            c.close()
+            # アップロード後のページに転送
             return redirect("/bbs")
 
 #三木追加開始 
